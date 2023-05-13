@@ -1,4 +1,7 @@
-import os 
+# TODO: 1- make all the objects of the class rectangle
+# TODO: 2- make the collision detection system with the rectangle point relation
+
+import os
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
@@ -25,7 +28,7 @@ keys_pressed = set()
 car_pos = [100, 250]
 car_angle = [0.0]
 car_vel = [0.0, 0.0]
-obstacle_speed = 0.2  # Changes on linux
+obstacle_speed = 0.01  # Changes on linux
 
 
 # * =================================== Init PROJECTION ===================================== * #
@@ -46,7 +49,6 @@ world = Rectangle(WINDOW_WIDTH, WINDOW_HEIGHT, 0, 0)
 
 # ! LAYER 01
 rect_L1_1 = Rectangle(WINDOW_WIDTH, 150, 0, 0)
-
 # ! LAYER 02
 rect_L2_1 = Rectangle(
     650, MIDDLE_ROAD[1],
@@ -113,86 +115,100 @@ def drawState(carObj, texture_index):
         carObj.left = WINDOW_WIDTH
         carObj.right = WINDOW_WIDTH + 80
 
-# * ===============================================  Start & End  ========================================== * #
 
-# signal 
-start = 1
-
-# start buttom size :
-button_width  = 120
-button_height = 60
-
-start_button = Rectangle(button_width, button_height, (WINDOW_WIDTH/2)-(button_width/2), (WINDOW_HEIGHT/2)-(button_height/2)+100)
-
-def draw_start():
-    world.draw_texture(14)
-    start_button.draw_texture(15)
-    
-
-
-def MouseMotion(button, state, x, y):
-    global start
-    # handle click process at start button :
-    if start == 1 :
-        if start_button.left <= x <= start_button.right and WINDOW_HEIGHT-start_button.top <= y <= WINDOW_HEIGHT-start_button.bottom and button == GLUT_LEFT_BUTTON:
-            #glDeleteTextures(2, texture_names)
-            start = 0
-
+# # * ===============================================  Start & End  ========================================== * #
+#
+# # signal
+# start = 1
+#
+# # start buttom size :
+# button_width = 120
+# button_height = 60
+#
+# start_button = Rectangle(button_width, button_height, (WINDOW_WIDTH / 2) - (button_width / 2),
+#                          (WINDOW_HEIGHT / 2) - (button_height / 2) + 100)
+#
+#
+# def draw_start():
+#     world.draw_texture(14)
+#     start_button.draw_texture(15)
+#
+#
+# def MouseMotion(button, state, x, y):
+#     global start
+#
+#     # handle click process at start button :
+#     if start == 1:
+#         if start_button.left <= x <= start_button.right and WINDOW_HEIGHT - start_button.top <= y <= WINDOW_HEIGHT - start_button.bottom and button == GLUT_LEFT_BUTTON:
+#             # glDeleteTextures(2, texture_names)
+#             start = 0
+#
+#
 # * ===============================================  DRAW FUNCTION ========================================== * #
 
 def draw():
     global car_pos, car_angle, car_vel, keys_pressed, obstacle_speed
     glClear(GL_COLOR_BUFFER_BIT)
 
-    if start == 1 :
-        draw_start()
-    
-    else :
-        drawTextures((1, 1, 1), world)
-        # * ========================= Draw cars ========================= * #
-        obs_list = [car_Obj_1_0, car_Obj_1_1, car_Obj_1_2,
-                    car_Obj_2_0, car_Obj_2_1, car_Obj_2_2,
-                    car_Obj_3_0, car_Obj_3_1, car_Obj_3_2,
-                    car_Obj_4_0, car_Obj_4_1, car_Obj_4_2]
+    #draw the world
+    drawTextures(world) # it draws the world only
 
-        j = 2
+
+
+
+
+
+
+    # if start == 1:
+    #     draw_start()
+
+    # else:
+
+    # * ========================= Draw cars ========================= * #
+    obs_list = [car_Obj_1_0, car_Obj_1_1, car_Obj_1_2,
+                car_Obj_2_0, car_Obj_2_1, car_Obj_2_2,
+                car_Obj_3_0, car_Obj_3_1, car_Obj_3_2,
+                car_Obj_4_0, car_Obj_4_1, car_Obj_4_2]
+
+    j = 2
+    for i in obs_list:
+        drawState(i, j)
+        # you will add the collision algorithm here
+        # i: the obstacle car
+        obstacle_collision(i, car_pos, car_vel, car_angle, CAR_LENGTH, CAR_WIDTH)
+        j += 1
+
+    # * ========================= Main car ========================= * #
+
+    if 'base' in keys_pressed:  # only for test
         for i in obs_list:
-            drawState(i , j)
-            obstacle_collision(i, car_pos, car_vel, car_angle, CAR_LENGTH, CAR_WIDTH)
-            j += 1
+            i.car_Direction *= 0.99
 
-        # * ========================= Main car ========================= * #
+    if 'notbase' in keys_pressed:  # only for test
+        for i in obs_list:
+            i.car_Direction /= 0.99
 
-        if 'base' in keys_pressed:  # only for test
-            for i in obs_list:
-                i.car_Direction *= 0.99
+    if 'left' in keys_pressed:
+        car_angle[0] += CAR_ROTATION_SPEED
+    if 'right' in keys_pressed:
+        car_angle[0] -= CAR_ROTATION_SPEED
+    if 'up' in keys_pressed:
+        car_vel[0] += CAR_SPEED * math.cos(math.radians(car_angle[0]))
+        car_vel[1] += CAR_SPEED * math.sin(math.radians(car_angle[0]))
+    if 'down' in keys_pressed:
+        car_vel[0] -= CAR_SPEED * math.cos(math.radians(car_angle[0]))
+        car_vel[1] -= CAR_SPEED * math.sin(math.radians(car_angle[0]))
+    car_pos[0] += car_vel[0]
+    car_pos[1] += car_vel[1]
+    car_vel[0] *= 0.965
+    car_vel[1] *= 0.965
 
-        if 'notbase' in keys_pressed:  # only for test
-            for i in obs_list:
-                i.car_Direction /= 0.99
+    # Collision detection to the side walls
+    wall_collision(car_pos, car_vel, car_angle, CAR_LENGTH, CAR_WIDTH)
+    arrival_line(car_pos, CAR_LENGTH)
 
-        if 'left' in keys_pressed:
-            car_angle[0] += CAR_ROTATION_SPEED
-        if 'right' in keys_pressed:
-            car_angle[0] -= CAR_ROTATION_SPEED
-        if 'up' in keys_pressed:
-            car_vel[0] += CAR_SPEED * math.cos(math.radians(car_angle[0]))
-            car_vel[1] += CAR_SPEED * math.sin(math.radians(car_angle[0]))
-        if 'down' in keys_pressed:
-            car_vel[0] -= CAR_SPEED * math.cos(math.radians(car_angle[0]))
-            car_vel[1] -= CAR_SPEED * math.sin(math.radians(car_angle[0]))
-        car_pos[0] += car_vel[0]
-        car_pos[1] += car_vel[1]
-        car_vel[0] *= 0.965
-        car_vel[1] *= 0.965
-
-        # Collision detection to the side walls
-        wall_collision(car_pos, car_vel, car_angle, CAR_LENGTH, CAR_WIDTH)
-        arrival_line(car_pos, CAR_LENGTH)
-
-
-        car = MainCar(CAR_WIDTH, CAR_LENGTH,
-                    car_pos[0], car_pos[1], car_angle[0], [0.6, 0.8, 0.5])
+    car = MainCar(CAR_WIDTH, CAR_LENGTH,
+                  car_pos[0], car_pos[1], car_angle[0])
 
     glutSwapBuffers()
 
@@ -250,9 +266,10 @@ def Timer(v):
     draw()
     glutTimerFunc(time_interval, Timer, 1)
 
+
 def main():
     glutInit()
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB )
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB)
     glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT)
     glutInitWindowPosition(500, 100)
     glutCreateWindow(b"FORSA GAME")
@@ -260,15 +277,16 @@ def main():
     glutIdleFunc(draw)
     glutKeyboardFunc(keyboard)
     glutKeyboardUpFunc(keyboard_up)
-    glutMouseFunc(MouseMotion)
+    # glutMouseFunc(MouseMotion)
     glutTimerFunc(time_interval, Timer, 50)
     init()
     load_setup_textures()
     glutMainLoop()
 
+
 current_dir = os.getcwd().strip('\/core')
 
-if os.name == "posix" and not(current_dir.startswith('/')) : # if linux
+if os.name == "posix" and not (current_dir.startswith('/')):  # if linux
     current_dir = "/" + current_dir
 
 os.chdir(current_dir)

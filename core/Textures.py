@@ -2,8 +2,8 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 import pygame
-# from Rectangles import *
 
+# from Rectangles import *
 
 
 """ STEPS
@@ -42,47 +42,12 @@ def loadHelper(path, index):
         binaryImage, textureIdentifiers[index], image.get_width(), image.get_height())
 
 
-def drawHelper(textureIndex, left, right, top, bottom):
-    glBindTexture(GL_TEXTURE_2D, textureIdentifiers[textureIndex])
-    glBegin(GL_QUADS)
-    glTexCoord2f(0.0, 0.0)
-    glVertex(left, bottom, 0)
-    glTexCoord2f(1, 0.0)
-    glVertex(right, bottom, 0)
-    glTexCoord2f(1, 1)
-    glVertex(right, top, 0)
-    glTexCoord2f(0.0, 1)
-    glVertex(left, top, 0)
-    glEnd()
-    glBindTexture(GL_TEXTURE_2D, -1)
-
-
-def drawHelper1 (textureIndex, left, right, top, bottom):
-    glBindTexture(GL_TEXTURE_2D, textureIdentifiers[textureIndex])
-    glBegin(GL_QUADS)
-    glTexCoord2f(0.0, 0.0)
-    glVertex(left, bottom, 0.5)
-    glTexCoord2f(1, 0.0)
-    glVertex(right, bottom, 0.5)
-    glTexCoord2f(1, 1)
-    glVertex(right, top, 0.5)
-    glTexCoord2f(0.0, 1)
-    glVertex(left, top, 0.5)
-    glEnd()
-    glBindTexture(GL_TEXTURE_2D, -1)
-
-
 def load_setup_textures():
     glEnable(GL_TEXTURE_2D)
-
     glGenTextures(len(textureIdentifiers), textureIdentifiers)
-    # TODO: Load all textures here
-    #
-    loadHelper("World Assets/start.png", 14)
-    loadHelper("World Assets/start-button.png", 15)
 
-    loadHelper("World Assets/porche_911.png", 1)
     loadHelper("World Assets/world.png", 0)
+    loadHelper("World Assets/porche_911.png", 1)
 
     loadHelper("World Assets/car-yellow.png", 2)
     loadHelper("World Assets/car-red.png", 3)
@@ -99,8 +64,22 @@ def load_setup_textures():
     loadHelper("World Assets/car-purple-2.png", 11)
     loadHelper("World Assets/car-pink.png", 12)
     loadHelper("World Assets/car-orange.png", 13)
+    loadHelper("World Assets/start.png", 14)
+    loadHelper("World Assets/start-button.png", 15)
 
-def drawTextures(color, world):
+def drawHelper(textureIndex, left, right, top, bottom):
+    glBindTexture(GL_TEXTURE_2D, textureIdentifiers[textureIndex])
+    glBegin(GL_QUADS)
+    glTexCoord2f(0.0, 0.0)
+    glVertex(left, bottom, 0)
+    glTexCoord2f(1, 0.0)
+    glVertex(right, bottom, 0)
+    glTexCoord2f(1, 1)
+    glVertex(right, top, 0)
+    glTexCoord2f(0.0, 1)
+    glVertex(left, top, 0)
+    glEnd()
+    glBindTexture(GL_TEXTURE_2D, -1)
+def drawTextures(quad):
     # TODO: Draw all textures here [ WORLD , MAIN CAR , OTHER CARS(12)]
-    glColor(color[0], color[1], color[2])
-    drawHelper(0, world.left, world.right, world.top, world.bottom)
+    drawHelper(quad.idx, quad.left, quad.right, quad.top, quad.bottom)

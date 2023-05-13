@@ -3,6 +3,8 @@ from Textures import *
 
 
 class Rectangle:
+    index = -1
+
     def __init__(self, width, height, x, y):
         self.width = width
         self.height = height
@@ -10,11 +12,12 @@ class Rectangle:
         self.left = x
         self.top = y + height
         self.bottom = y
-
+        self.idx = Rectangle.index + 1
     def draw_texture(self, texture_index):
-        drawHelper1(texture_index, self.left, self.right, self.top, self.bottom)
+        drawHelper(texture_index, self.left,
+                   self.right, self.top, self.bottom)
 
-    def drawRectangle(self, color: tuple = (1, 1, 1)):
+    def drawRectangle(self, color=(1, 1, 1)):
         glColor3f(color[0], color[1], color[2])
         glBegin(GL_QUADS)
         glVertex2f(self.left, self.bottom)
@@ -25,22 +28,12 @@ class Rectangle:
 
 
 class MainCar:
-    def __init__(self, x, y, trans_x, trans_y, theta, rgb):
-        self.x = x
-        self.y = y
-        self.right = trans_x + (x / 2)
-        self.left = trans_x - (x / 2)
-        self.top = trans_y + (y / 2)
-        self.bottom = trans_y - (y / 2)
-
+    def __init__(self, CAR_WIDTH, CAR_LENGTH, trans_x, trans_y, theta):
         glPushMatrix()
         glTranslatef(trans_x, trans_y, 0)
         glRotatef(theta, 0, 0, 1)
-        # Another draw-helper for the car
-        drawHelper1(1, -x / 2, x / 2, y / 2, -y / 2)
+        drawHelper(1, -CAR_WIDTH / 2, CAR_WIDTH / 2, CAR_LENGTH / 2, -CAR_LENGTH / 2)
         glPopMatrix()
-
-
 
 
 class Car_Model:
@@ -52,12 +45,12 @@ class Car_Model:
         self.car_Direction = car_Direction * obstacle_speed
 
     def draw_texture(self, texture_index):
-        drawHelper1(texture_index, self.left, self.right, self.top, self.bottom)
+        drawHelper(texture_index, self.left, self.right, self.top, self.bottom)
 
     def draw_car(self):
         glBegin(GL_POLYGON)
-        glVertex(self.left + 20, self.bottom + 20, 0.5)
-        glVertex(self.right - 20, self.bottom + 20, 0.5)
-        glVertex(self.right - 20, self.top - 20, 0.5)
-        glVertex(self.left + 20, self.top - 20, 0.5)
+        glVertex(self.left, self.bottom, 0)
+        glVertex(self.right, self.bottom, 0)
+        glVertex(self.right, self.top, 0)
+        glVertex(self.left, self.top, 0)
         glEnd()
