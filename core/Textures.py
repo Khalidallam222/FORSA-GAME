@@ -19,67 +19,74 @@ import pygame
 """
 
 """textures:world , main car , 12 cars"""
-textureIdentifiers = [i for i in range(16)]
+texture_number = 24
+global texture
 
-
-def setupHelper(texture, textureIdentifier, width, height):
+def setupHelper(image_raw_data, texture_index, width, height):
+    global texture
     glEnable(GL_BLEND)  # FOR BLENDING
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)  # FOR BLENDING
-    glBindTexture(GL_TEXTURE_2D, textureIdentifier)
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
-                      texture)
+    glBindTexture(GL_TEXTURE_2D, texture[texture_index])
+    glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)  # GL_NEAREST)
+    glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)  # GL_LINEAR)
+    glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)  # GL_CLAMP)
+    glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)  # GL_CLAMP)
+    gluBuild2DMipmaps(GL_TEXTURE_2D, 4, width, height, GL_RGBA, GL_UNSIGNED_BYTE, image_raw_data)
 
 
-def loadHelper(path, index):
+def loadHelper(path, texture_index):
+    global texture
     image = pygame.image.load(path)
 
-    binaryImage = pygame.image.tostring(image, "RGBA", True)
+    image_raw_data = pygame.image.tostring(image, "RGBA", True)
     setupHelper(
-        binaryImage, textureIdentifiers[index], image.get_width(), image.get_height())
+        image_raw_data, texture_index, image.get_width(), image.get_height())
 
 
 def load_setup_textures():
+    global texture
+    # we'll use it to load all needed textures for one time
     glEnable(GL_TEXTURE_2D)
-    glGenTextures(len(textureIdentifiers), textureIdentifiers)
+    texture = glGenTextures(texture_number)
+    loadHelper("World Assets/LOWER_ROAD.png", 0)
+    loadHelper("World Assets/MIDDLE_ROAD.png", 1)
+    loadHelper("World Assets/UPPER_ROAD.png", 2)
+    loadHelper("World Assets/UPPER_LEFT_ROAD.png", 3)
+    loadHelper("World Assets/UPPER_RIGHT_ROAD.png", 4)
+    loadHelper("World Assets/rect_L1_1.png", 5)
+    loadHelper("World Assets/rect_L2_1.png", 6)
+    loadHelper("World Assets/rect_L2_2.png", 7)
+    loadHelper("World Assets/rect_L3_1.png", 8)
+    loadHelper("World Assets/rect_L3_2.png", 9)
+    loadHelper("World Assets/rect_L3_3.png", 10)
 
-    loadHelper("World Assets/world.png", 0)
-    loadHelper("World Assets/porche_911.png", 1)
+    loadHelper("World Assets/car-yellow.png", 11)
+    loadHelper("World Assets/car-red.png", 12)
+    loadHelper("World Assets/car-purple.png", 13)
+    loadHelper("World Assets/car-purple-2.png", 14)
+    loadHelper("World Assets/car-pink.png", 15)
+    loadHelper("World Assets/car-orange.png", 16)
+    loadHelper("World Assets/car-green.png", 17)
+    loadHelper("World Assets/car-blue.png", 18)
+    loadHelper("World Assets/car-red.png", 19)
+    loadHelper("World Assets/car-purple-2.png", 20)
+    loadHelper("World Assets/car-pink.png", 21)
+    loadHelper("World Assets/car-orange.png", 22)
 
-    loadHelper("World Assets/car-yellow.png", 2)
-    loadHelper("World Assets/car-red.png", 3)
-    loadHelper("World Assets/car-purple.png", 4)
+    loadHelper("World Assets/porche_911.png", 23)
 
-    loadHelper("World Assets/car-purple-2.png", 5)
-    loadHelper("World Assets/car-pink.png", 6)
-    loadHelper("World Assets/car-orange.png", 7)
-
-    loadHelper("World Assets/car-green.png", 8)
-    loadHelper("World Assets/car-blue.png", 9)
-    loadHelper("World Assets/car-red.png", 10)
-
-    loadHelper("World Assets/car-purple-2.png", 11)
-    loadHelper("World Assets/car-pink.png", 12)
-    loadHelper("World Assets/car-orange.png", 13)
-    loadHelper("World Assets/start.png", 14)
-    loadHelper("World Assets/start-button.png", 15)
 
 def drawHelper(textureIndex, left, right, top, bottom):
-    glBindTexture(GL_TEXTURE_2D, textureIdentifiers[textureIndex])
+    global texture
+    glBindTexture(GL_TEXTURE_2D, texture[textureIndex])
     glBegin(GL_QUADS)
-    glTexCoord2f(0.0, 0.0)
-    glVertex(left, bottom, 0)
-    glTexCoord2f(1, 0.0)
-    glVertex(right, bottom, 0)
-    glTexCoord2f(1, 1)
-    glVertex(right, top, 0)
-    glTexCoord2f(0.0, 1)
-    glVertex(left, top, 0)
+    glTexCoord(0, 0)
+    glVertex2f(left, bottom)
+    glTexCoord(1, 0)
+    glVertex2f(right, bottom)
+    glTexCoord(1, 1)
+    glVertex2f(right, top)
+    glTexCoord(0, 1)
+    glVertex2f(left, top)
     glEnd()
-    glBindTexture(GL_TEXTURE_2D, -1)
-def drawTextures(quad):
-    # TODO: Draw all textures here [ WORLD , MAIN CAR , OTHER CARS(12)]
-    drawHelper(quad.idx, quad.left, quad.right, quad.top, quad.bottom)
+    # glBindTexture(GL_TEXTURE_2D, -1)

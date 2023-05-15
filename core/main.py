@@ -11,24 +11,19 @@ from Textures import *
 from Collision import *
 
 # WINDOW PROPERTIES
-WINDOW_WIDTH, WINDOW_HEIGHT = 1200, 900
-
-# ROADS WIDTHS AND HEIGHTS
-LOWER_ROAD_HEIGHT = UPPER_ROAD_HEIGHT = 200
-MIDDLE_ROAD = (250, 150)
-UPPER_LEFT_ROAD_WIDTH = UPPER_RIGHT_ROAD_WIDTH = 250
+WINDOW_WIDTH, WINDOW_HEIGHT = 1000, 1000
 
 # CAR PROPERTIES
-CAR_WIDTH = 60
-CAR_LENGTH = 30
-CAR_SPEED = 0.15
+CAR_WIDTH = 70
+CAR_HIEGHT = 30
+CAR_SPEED = 0.1
 CAR_ROTATION_SPEED = 1
 time_interval = 1
 keys_pressed = set()
-car_pos = [100, 250]
-car_angle = [0.0]
+car_pos = [WINDOW_WIDTH / 10, 3 * WINDOW_HEIGHT / 10]
+car_angle = [90.0]
 car_vel = [0.0, 0.0]
-obstacle_speed = 0.01  # Changes on linux
+obstacle_speed = 1  # Changes on linux
 
 
 # * =================================== Init PROJECTION ===================================== * #
@@ -38,131 +33,136 @@ def init():
     glClearColor(0.0, 0.0, 0.0, 0.0)
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    gluOrtho2D(0, WINDOW_WIDTH, 0, WINDOW_HEIGHT)
+    glOrtho(0, WINDOW_WIDTH, 0, WINDOW_HEIGHT, -1, 1)
     glMatrixMode(GL_MODELVIEW)
 
 
-# * ========================= Rectangle ( width, height ,  x ,  y ) ========================= * #
+# * ========================= Rectangle ( left, right ,  top , bottom ) ========================= * #
+# Roads
+LOWER_ROAD = Rectangle(0, WINDOW_WIDTH, WINDOW_HEIGHT / 5 - 10, 2 * WINDOW_HEIGHT / 5 + 10)
+MIDDLE_ROAD = Rectangle(WINDOW_WIDTH / 2 - 20, 3 * WINDOW_WIDTH / 4 + 10, 2 * WINDOW_HEIGHT / 5, 3 * WINDOW_HEIGHT / 5)
 
-# ! World Rectangle
-world = Rectangle(WINDOW_WIDTH, WINDOW_HEIGHT, 0, 0)
-
+UPPER_ROAD = Rectangle(0, WINDOW_WIDTH, 3 * WINDOW_HEIGHT / 5 - 10, 4 * WINDOW_HEIGHT / 5 + 10)
+UPPER_LEFT_ROAD = Rectangle(WINDOW_WIDTH / 10 - 10, 3 * WINDOW_WIDTH / 10 + 10, 4 * WINDOW_HEIGHT / 5, WINDOW_HEIGHT)
+UPPER_RIGHT_ROAD = Rectangle(7 * WINDOW_WIDTH / 10 - 10, 9 * WINDOW_WIDTH / 10 + 10, 4 * WINDOW_HEIGHT / 5,
+                             WINDOW_HEIGHT)
 # ! LAYER 01
-rect_L1_1 = Rectangle(WINDOW_WIDTH, 150, 0, 0)
-# ! LAYER 02
-rect_L2_1 = Rectangle(
-    650, MIDDLE_ROAD[1],
-    0, rect_L1_1.top + LOWER_ROAD_HEIGHT)
+rect_L1_1 = Rectangle(0, WINDOW_WIDTH, 0, WINDOW_HEIGHT / 5)
+# # ! LAYER 02
+rect_L2_1 = Rectangle(-10, WINDOW_WIDTH / 2, 2 * WINDOW_HEIGHT / 5, 3 * WINDOW_HEIGHT / 5)
+rect_L2_2 = Rectangle(3 * WINDOW_WIDTH / 4, WINDOW_WIDTH, 2 * WINDOW_HEIGHT / 5, 3 * WINDOW_HEIGHT / 5)
+# # ! LAYER 03
+rect_L3_1 = Rectangle(0, WINDOW_WIDTH / 10, 4 * WINDOW_HEIGHT / 5, WINDOW_HEIGHT)
+rect_L3_2 = Rectangle(3 * WINDOW_WIDTH / 10, 7 * WINDOW_WIDTH / 10, 4 * WINDOW_HEIGHT / 5, WINDOW_HEIGHT)
+rect_L3_3 = Rectangle(9 * WINDOW_WIDTH / 10, 10 * WINDOW_WIDTH / 10, 4 * WINDOW_HEIGHT / 5, WINDOW_HEIGHT)
 
-rect_L2_2 = Rectangle(
-    WINDOW_WIDTH - MIDDLE_ROAD[0] - rect_L2_1.width, MIDDLE_ROAD[1],
-    rect_L2_1.right + MIDDLE_ROAD[0], rect_L1_1.top + LOWER_ROAD_HEIGHT)
-
-# ! LAYER 03
-layer3_height = WINDOW_HEIGHT - rect_L1_1.height - \
-                LOWER_ROAD_HEIGHT - rect_L2_1.height - UPPER_ROAD_HEIGHT
-
-rect_L3_1 = Rectangle(
-    150, layer3_height,
-    0, rect_L2_1.top + UPPER_ROAD_HEIGHT)
-
-rect_L3_2 = Rectangle(
-    400, layer3_height,
-    rect_L3_1.right + UPPER_LEFT_ROAD_WIDTH, rect_L2_1.top + UPPER_ROAD_HEIGHT)
-
-rect_L3_3 = Rectangle(
-    150, layer3_height,
-    rect_L3_2.right + UPPER_RIGHT_ROAD_WIDTH, rect_L2_1.top + UPPER_ROAD_HEIGHT)
-
-# * ========================= car model ( left, bottom , right ,  top , direction ) ========================= * #
-
-
+# # * ========================= car models ( left, right ,  top , bottom ) ========================= * #
 # road 1
-car_Obj_1_0 = Car_Model(100, 180, 180, 220, 3, obstacle_speed)
-car_Obj_1_1 = Car_Model(400, 180, 480, 220, 3, obstacle_speed)
-car_Obj_1_2 = Car_Model(800, 180, 880, 220, 3, obstacle_speed)
-
+car_Obj_1_0 = Rectangle(0, CAR_WIDTH, WINDOW_HEIGHT / 5, WINDOW_HEIGHT / 5 + CAR_HIEGHT)
+car_Obj_1_1 = Rectangle(WINDOW_WIDTH / 3, WINDOW_WIDTH / 3 + CAR_WIDTH, WINDOW_HEIGHT / 5,
+                        WINDOW_HEIGHT / 5 + CAR_HIEGHT)
+car_Obj_1_2 = Rectangle(2 * WINDOW_WIDTH / 3, 2 * WINDOW_WIDTH / 3 + CAR_WIDTH, WINDOW_HEIGHT / 5,
+                        WINDOW_HEIGHT / 5 + CAR_HIEGHT)
 # road 2
-car_Obj_2_0 = Car_Model(100, 280, 180, 320, -4, obstacle_speed)
-car_Obj_2_1 = Car_Model(400, 280, 480, 320, -4, obstacle_speed)
-car_Obj_2_2 = Car_Model(900, 280, 980, 320, -4, obstacle_speed)
-
+car_Obj_2_0 = Rectangle(0, CAR_WIDTH, 2 * WINDOW_HEIGHT / 5 - CAR_HIEGHT, 2 * WINDOW_HEIGHT / 5)
+car_Obj_2_1 = Rectangle(WINDOW_WIDTH / 3, WINDOW_WIDTH / 3 + CAR_WIDTH, 2 * WINDOW_HEIGHT / 5 - CAR_HIEGHT,
+                        2 * WINDOW_HEIGHT / 5)
+car_Obj_2_2 = Rectangle(2 * WINDOW_WIDTH / 3, 2 * WINDOW_WIDTH / 3 + CAR_WIDTH, 2 * WINDOW_HEIGHT / 5 - CAR_HIEGHT,
+                        2 * WINDOW_HEIGHT / 5)
 # road 3
-car_Obj_3_0 = Car_Model(500, 530, 580, 570, 4, obstacle_speed)
-car_Obj_3_1 = Car_Model(900, 530, 980, 570, 4, obstacle_speed)
-car_Obj_3_2 = Car_Model(200, 530, 280, 570, 4, obstacle_speed)
-
+car_Obj_3_0 = Rectangle(0, CAR_WIDTH, 3 * WINDOW_HEIGHT / 5, 3 * WINDOW_HEIGHT / 5 + CAR_HIEGHT)
+car_Obj_3_1 = Rectangle(WINDOW_WIDTH / 3, WINDOW_WIDTH / 3 + CAR_WIDTH, 3 * WINDOW_HEIGHT / 5,
+                        3 * WINDOW_HEIGHT / 5 + CAR_HIEGHT)
+car_Obj_3_2 = Rectangle(2 * WINDOW_WIDTH / 3, 2 * WINDOW_WIDTH / 3 + CAR_WIDTH, 3 * WINDOW_HEIGHT / 5,
+                        3 * WINDOW_HEIGHT / 5 + CAR_HIEGHT)
 # road 4
-car_Obj_4_0 = Car_Model(600, 630, 680, 670, -9, obstacle_speed)
-car_Obj_4_1 = Car_Model(200, 630, 280, 670, -9, obstacle_speed)
-car_Obj_4_2 = Car_Model(1100, 630, 1180, 670, -9, obstacle_speed)
+car_Obj_4_0 = Rectangle(0, CAR_WIDTH, 4 * WINDOW_HEIGHT / 5 - CAR_HIEGHT, 4 * WINDOW_HEIGHT / 5)
+car_Obj_4_1 = Rectangle(WINDOW_WIDTH / 3, WINDOW_WIDTH / 3 + CAR_WIDTH, 4 * WINDOW_HEIGHT / 5 - CAR_HIEGHT,
+                        4 * WINDOW_HEIGHT / 5)
+car_Obj_4_2 = Rectangle(2 * WINDOW_WIDTH / 3, 2 * WINDOW_WIDTH / 3 + CAR_WIDTH, 4 * WINDOW_HEIGHT / 5 - CAR_HIEGHT,
+                        4 * WINDOW_HEIGHT / 5)
+# # * ============================================ The main Car  ============================================ * #
+car = Rectangle(0, CAR_WIDTH, 0, CAR_HIEGHT)
 
 
-# * ================================= Draw other cor state  ================================= * #
-
-def drawState(carObj, texture_index):
+def collision_action():
+    global car_pos, car_angle, car_vel
+    car_pos = [WINDOW_WIDTH / 10, 3 * WINDOW_HEIGHT / 10]
+    car_angle[0] = 0
+    car_vel = [0.0, 0.0]
+def drawState(carObj):
+    global obstacle_speed
     glColor(1, 1, 1)  # White color
-    carObj.draw_texture(texture_index)
+    carObj.draw_texture()
 
-    carObj.left = carObj.left + carObj.car_Direction
-    carObj.right = carObj.right + carObj.car_Direction
+    carObj.left = carObj.left + obstacle_speed
+    carObj.right = carObj.right + obstacle_speed
 
-    if carObj.left >= WINDOW_WIDTH and carObj.car_Direction > 0:
-        carObj.left = -80
+    if carObj.left >= WINDOW_WIDTH:
+        carObj.left = -CAR_WIDTH
         carObj.right = 0
 
-    if carObj.right <= 0 and carObj.car_Direction < 0:
-        carObj.left = WINDOW_WIDTH
-        carObj.right = WINDOW_WIDTH + 80
 
+def main_car_movement():
+    car.left = car_pos[0]
+    car.right = car_pos[0] + CAR_WIDTH
+    car.top = car_pos[1] + CAR_HIEGHT
+    car.bottom = car_pos[1]
+    glPushMatrix()
+    glTranslatef(car_pos[0], car_pos[1], 0)
+    glRotatef(car_angle[0], 0, 0, 1)
+    glTranslatef(-car_pos[0], -car_pos[1], 0)
+    car.draw_texture()
+    # print(car_angle[0])
+    glPopMatrix()
 
-# # * ===============================================  Start & End  ========================================== * #
-#
-# # signal
-# start = 1
-#
-# # start buttom size :
-# button_width = 120
-# button_height = 60
-#
-# start_button = Rectangle(button_width, button_height, (WINDOW_WIDTH / 2) - (button_width / 2),
-#                          (WINDOW_HEIGHT / 2) - (button_height / 2) + 100)
-#
-#
-# def draw_start():
-#     world.draw_texture(14)
-#     start_button.draw_texture(15)
-#
-#
-# def MouseMotion(button, state, x, y):
-#     global start
-#
-#     # handle click process at start button :
-#     if start == 1:
-#         if start_button.left <= x <= start_button.right and WINDOW_HEIGHT - start_button.top <= y <= WINDOW_HEIGHT - start_button.bottom and button == GLUT_LEFT_BUTTON:
-#             # glDeleteTextures(2, texture_names)
-#             start = 0
-#
-#
 # * ===============================================  DRAW FUNCTION ========================================== * #
 
 def draw():
     global car_pos, car_angle, car_vel, keys_pressed, obstacle_speed
     glClear(GL_COLOR_BUFFER_BIT)
+    glClearColor(0, 0, 0, 1)
 
-    #draw the world
-    drawTextures(world) # it draws the world only
+    # draw the world
+    # LOWER_ROAD.drawRectangle((1,0,0))
+    LOWER_ROAD.draw_texture()
 
+    # MIDDLE_ROAD.drawRectangle((1,0,0))
+    MIDDLE_ROAD.draw_texture()
 
+    # UPPER_ROAD.drawRectangle((1,0,0))
+    UPPER_ROAD.draw_texture()
 
+    # UPPER_LEFT_ROAD.drawRectangle((1,0,0))
+    UPPER_LEFT_ROAD.draw_texture()
 
+    # UPPER_RIGHT_ROAD.drawRectangle((1,0,0))
+    UPPER_RIGHT_ROAD.draw_texture()
 
-
-
-    # if start == 1:
-    #     draw_start()
-
-    # else:
+    # rect_L1_1.drawRectangle((1,1,0))
+    rect_L1_1.draw_texture()
+    if collision(car_pos, car_angle, CAR_WIDTH, CAR_HIEGHT, rect_L1_1):
+        collision_action()
+    # rect_L2_1.drawRectangle((1,1,0))
+    rect_L2_1.draw_texture()
+    if collision(car_pos, car_angle, CAR_WIDTH, CAR_HIEGHT, rect_L2_1):
+        collision_action()
+    # rect_L2_2.drawRectangle((1,1,0))
+    rect_L2_2.draw_texture()
+    if collision(car_pos, car_angle, CAR_WIDTH, CAR_HIEGHT, rect_L2_2):
+        collision_action()
+    # rect_L3_1.drawRectangle((1,1,0))
+    rect_L3_1.draw_texture()
+    if collision(car_pos, car_angle, CAR_WIDTH, CAR_HIEGHT, rect_L3_1):
+        collision_action()
+    # rect_L3_2.drawRectangle((1,1,0))
+    rect_L3_2.draw_texture()
+    if collision(car_pos, car_angle, CAR_WIDTH, CAR_HIEGHT, rect_L3_2):
+        collision_action()
+    # rect_L3_3.drawRectangle((1,1,0))
+    rect_L3_3.draw_texture()
+    if collision(car_pos, car_angle, CAR_WIDTH, CAR_HIEGHT, rect_L3_3):
+        collision_action()
 
     # * ========================= Draw cars ========================= * #
     obs_list = [car_Obj_1_0, car_Obj_1_1, car_Obj_1_2,
@@ -170,23 +170,11 @@ def draw():
                 car_Obj_3_0, car_Obj_3_1, car_Obj_3_2,
                 car_Obj_4_0, car_Obj_4_1, car_Obj_4_2]
 
-    j = 2
     for i in obs_list:
-        drawState(i, j)
-        # you will add the collision algorithm here
-        # i: the obstacle car
-        obstacle_collision(i, car_pos, car_vel, car_angle, CAR_LENGTH, CAR_WIDTH)
-        j += 1
+        drawState(i)
+        if collision(car_pos, car_angle, CAR_WIDTH, CAR_HIEGHT, i):
+            collision_action()
 
-    # * ========================= Main car ========================= * #
-
-    if 'base' in keys_pressed:  # only for test
-        for i in obs_list:
-            i.car_Direction *= 0.99
-
-    if 'notbase' in keys_pressed:  # only for test
-        for i in obs_list:
-            i.car_Direction /= 0.99
 
     if 'left' in keys_pressed:
         car_angle[0] += CAR_ROTATION_SPEED
@@ -203,12 +191,11 @@ def draw():
     car_vel[0] *= 0.965
     car_vel[1] *= 0.965
 
-    # Collision detection to the side walls
-    wall_collision(car_pos, car_vel, car_angle, CAR_LENGTH, CAR_WIDTH)
-    arrival_line(car_pos, CAR_LENGTH)
+    main_car_movement()
 
-    car = MainCar(CAR_WIDTH, CAR_LENGTH,
-                  car_pos[0], car_pos[1], car_angle[0])
+
+
+    
 
     glutSwapBuffers()
 
@@ -254,12 +241,6 @@ def keyboard_up(key, x, y):
     elif key == b's':
         keys_pressed.remove('down')
         # print(keys_pressed)
-    elif key == b'q':
-        keys_pressed.remove('base')
-        print(keys_pressed)
-    elif key == b'e':
-        keys_pressed.remove('notbase')
-        print(keys_pressed)
 
 
 def Timer(v):
@@ -271,7 +252,7 @@ def main():
     glutInit()
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB)
     glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT)
-    glutInitWindowPosition(500, 100)
+    glutInitWindowPosition(0, 0)
     glutCreateWindow(b"FORSA GAME")
     glutDisplayFunc(draw)
     glutIdleFunc(draw)
